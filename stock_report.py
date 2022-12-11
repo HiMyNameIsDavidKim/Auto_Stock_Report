@@ -32,16 +32,15 @@ class Stock_report():
         symbol = self.symbol
         symbol_default = self.symbol_default
         prices_now = self.prices_now
+        xp_now = '//*[@id="content"]/div/div[2]/div/div/div[1]/div/div[2]/span[1]'
         for i in symbol:
             browser.get(self.url + i)
-            xp_now = '//*[@id="content"]/div/div[2]/div/div/div[1]/div/div[2]/span[1]'
             price_now = browser.find_element(By.XPATH, xp_now).text
-            prices_now.append(str(price_now[1:]))
+            prices_now.append(float(price_now[1:]))
         for i in symbol_default:
             browser.get(self.url + i)
-            xp_now = '//*[@id="content"]/div/div[2]/div/div/div[1]/div/div[2]/span[1]'
             price_now = browser.find_element(By.XPATH, xp_now).text
-            prices_now.append(str(price_now[1:]))
+            prices_now.append(float(price_now[1:]))
         browser.quit()
     
     def update_file(self):
