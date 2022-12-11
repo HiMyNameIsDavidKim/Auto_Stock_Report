@@ -22,3 +22,11 @@ for checkbox in checkboxes:
     label = parent.find_element(By.TAG_NAME, 'label')
     if label.text in items_to_select:
         checkbox.click()
+
+btn_apply = browser.find_element(By.XPATH, '//a[@href="javascript:fieldSubmit()"]')
+btn_apply.click()
+
+df = pd.read_html(browser.page_source)[1]
+df.dropna(axis='index', how='all', inplace=True)
+df.dropna(axis='columns', how='all', inplace=True)
+
