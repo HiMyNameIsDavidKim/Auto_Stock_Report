@@ -41,6 +41,7 @@ class Stock_report():
         prices_now = self.prices_now
         prices_52w = self.prices_52w
         prices_mon = self.prices_mon
+
         xp_now = '//*[@id="__next"]/div/div/div/div[2]/main/div/div[1]/div[2]/div[1]/span'
         xp_52w = '//*[@id="__next"]/div/div/div/div[2]/main/div/div[1]/div[2]/ul/li[3]/div[2]'
         for i in stock:
@@ -50,6 +51,7 @@ class Stock_report():
             price_52w = browser.find_element(By.XPATH, xp_52w).text
             price_52w = price_52w[(price_52w.find('-') + 2):]
             prices_52w.append(float(price_52w))
+
         xp_now = '//*[@id="last_last"]'
         xp_52w = '//*[@id="leftColumn"]/div[9]/div[5]/span[2]'
         for i in stock_etf:
@@ -59,12 +61,14 @@ class Stock_report():
             price_52w = browser.find_element(By.XPATH, xp_52w).text
             price_52w = price_52w[(price_52w.find('-') + 2):]
             prices_52w.append(float(price_52w))
+
         for i in stock:
             browser.get(self.url + i + '-historical-data')
             date_choice = str(datetime.today())[5:7] + '/01/' + str(datetime.today())[:4]
             df = pd.read_html(browser.page_source)[1]
             price_mon = df.loc[df['Date'] == date_choice]['Price']
             prices_mon.append(float(price_mon))
+            
         browser.quit()
 
     def update_file(self):
