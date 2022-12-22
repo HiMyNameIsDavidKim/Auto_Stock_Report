@@ -5,10 +5,11 @@
 * Way to crawl : Use Chrome Driver and selenium.
 * Crawl from this site : www.investing.com
 * Default stocks : AAPL, GOOGL, NVDA, TSLA, KO, PEP, ASML
-* Default ETFs : QQQ, QLD, SPY
+* Default ETFs : QQQ, SPY
 
 ## [How to Run?]
 * Open `stock_report.py` python file. Just run.
+    * v2.0 is speed improved version.
 * Saved file is here. `report` directory.
 
 ## [Result]

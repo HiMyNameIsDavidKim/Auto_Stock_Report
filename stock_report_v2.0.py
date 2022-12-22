@@ -60,10 +60,6 @@ class Stock_report():
             df = pd.read_html(browser.page_source)[0]
             price_mon = df.loc[df['Date'] == date_choice]['Close*'].iloc[0]
             prices_mon.append(float(price_mon))
-        
-        print(prices_now)
-        print(prices_52w)
-        print(prices_mon)
 
         browser.quit()
 
