@@ -3,13 +3,15 @@
 
 ## [Instructions]
 * Way to crawl : Use Chrome Driver and selenium.
-* Crawl from this site : www.investing.com
+* Crawl from this site : www.investing.com, www.google.com, finance.yahoo.com
 * Default stocks : AAPL, GOOGL, NVDA, TSLA, KO, PEP, ASML
 * Default ETFs : QQQ, SPY
+* Version
+  * v2.0 : change site to google and yahoo finance. all method's speed is improved.
+  * v2.1 : when find now price and 52w price, use list comprehension. when find monthly price, use text finding.
 
 ## [How to Run?]
 * Open `stock_report.py` python file. Just run.
-    * v2.0 is speed improved version.
 * Saved file is here. `report` directory.
 
 ## [Result]

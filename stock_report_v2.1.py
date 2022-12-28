@@ -41,8 +41,6 @@ class Stock_report():
         stock_etf = self.stock_etf
         prices_mon = self.prices_mon
 
-        soup = BeautifulSoup(browser.page_source, 'html.parser')
-
         for i in (stock + stock_etf):
             browser.get(self.url_goo + i + '+stock')
             soup = BeautifulSoup(browser.page_source, features="lxml")
@@ -56,8 +54,8 @@ class Stock_report():
         for i in (stock + stock_etf):
             browser.get(self.url_yah + i + '/history?p=' + i)
             date_choice = str(datetime.today().strftime("%b")) + ' 01, ' + str(datetime.today().strftime("%Y"))
-            df = pd.read_html(browser.page_source)[0]
-            price_mon = df.loc[df['Date'] == date_choice]['Close*'].iloc[0]
+            soup = BeautifulSoup(browser.page_source, features="lxml")
+            price_mon = soup.find('span', text=date_choice).parent.next_sibling.text
             prices_mon.append(float(price_mon))
 
         browser.quit()
