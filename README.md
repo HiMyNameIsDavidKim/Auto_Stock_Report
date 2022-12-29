@@ -9,6 +9,7 @@
 * Version
   * v2.0 : change site to google and yahoo finance. all method's speed is improved.
   * v2.1 : when find now price and 52w price, use list comprehension. when find monthly price, use text finding.
+  * v2.2 : monthly update is too slow -> solution : origin file update only 1 time. separate month checker method.
 
 ## [How to Run?]
 * Open `stock_report.py` python file. Just run.
