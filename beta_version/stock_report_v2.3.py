@@ -91,7 +91,9 @@ class Stock_report():
         wb = openpyxl.load_workbook(save_path, data_only=True)
         ws = wb.active
 
-        d_alarm = [f'{self.stock[i]}: {j}%    ' if abs(j) > 5 else '' for i,j in enumerate(self.per_today)]
+        d_alarm = [f'{self.stock[i]}: {j}%    '
+                   if abs(j) > 5 else ''
+                   for i,j in enumerate(self.per_today)]
         self.d_alarms = ''.join(d_alarm)
         print(self.d_alarms)
 
