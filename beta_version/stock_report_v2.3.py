@@ -10,22 +10,27 @@ from bs4 import BeautifulSoup
 
 class Stock_report():
     def __init__(self):
-        global url_goo, url_yah, f_name, browser
+        global url_goo, url_yah, f_name, save_path, browser
         url_goo = 'https://www.google.com/search?q='
         url_yah = 'https://finance.yahoo.com/quote/'
-        f_name = './report/stock_report.xlsx'
+        f_name = '../report/stock_report.xlsx'
+        save_path = f"./test.xlsx"
         browser = webdriver.Chrome()
         self.stock = []
         self.stock_etf = []
         self.prices_now = []
         self.prices_52w = []
         self.prices_mon = []
+        self.per_today = []
+        self.d_alarms = f''
+        self.n_alarms = f''
 
     def process(self):
         self.stock_req()
         self.mon_checker()
         self.crawl_prices()
         self.update_file()
+        self.alarm()
 
     def stock_req(self):
         # stock = input('Please tell me tickers of stocks to crawl. : ').split()
@@ -63,11 +68,13 @@ class Stock_report():
             text_nows = [float(i.text) for i in find_now]
             find_52w = soup.find_all('div', attrs={'data-attrid': '52-주 최고'})
             text_52ws = [float(i.text) for i in find_52w]
+            find_per = soup.find('span', attrs={'class': 'jBBUv'})
+            text_per = float(find_per.text[1:-2])
             self.prices_now += text_nows
             self.prices_52w += text_52ws
+            self.per_today.append(text_per)
         browser.quit()
         print('crawling is completed.')
-
 
     def update_file(self):
         wb = openpyxl.load_workbook(f_name)
@@ -76,8 +83,29 @@ class Stock_report():
             ws["E"+str(15 + i)].value = j
         for i,j in enumerate(self.prices_52w):
             ws["C"+str(3 + i)].value = j
-        wb.save(f"./report/stock_report_{str(datetime.today())[2:11]}.xlsx")
+        wb.save(save_path)
         print('updating file is completed.')
+
+
+    def alarm(self):
+        wb = openpyxl.load_workbook(save_path, data_only=True)
+        ws = wb.active
+
+        d_alarm = [f'{self.stock[i]}: {j}%    ' if abs(j) > 5 else '' for i,j in enumerate(self.per_today)]
+        self.d_alarms = ''.join(d_alarm)
+        print(self.d_alarms)
+
+        for i, j in enumerate(self.per_today):
+            isnode = ws['F' + str(15 + i)].value * 100
+            print(isnode)
+            # if str(isnode - j)[1] != str(isnode)[1]:
+            #     n_alarm = f'{self.stock[i]}: {int(isnode)}%    '
+            #     self.n_alarms += n_alarm
+
+        if (self.d_alarms != '') or (self.n_alarms != ''):
+            wb = openpyxl.load_workbook(save_path)
+            ws = wb.active
+            ws["M15"].value = self.d_alarms
 
 
 if __name__ == '__main__':
