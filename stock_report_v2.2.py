@@ -10,11 +10,10 @@ from bs4 import BeautifulSoup
 
 class Stock_report():
     def __init__(self):
-        global url_goo, url_yah, f_name, browser
+        global url_goo, url_yah, f_name
         url_goo = 'https://www.google.com/search?q='
         url_yah = 'https://finance.yahoo.com/quote/'
         f_name = './report/stock_report.xlsx'
-        browser = webdriver.Chrome()
         self.stock = []
         self.stock_etf = []
         self.prices_now = []
@@ -40,22 +39,25 @@ class Stock_report():
     def mon_checker(self):
         wb = openpyxl.load_workbook(f_name)
         ws = wb.active
+        browser = webdriver.Chrome()
         if str(ws['B2'].value) != (str(datetime.today())[5:7]+'월'):
             ws['B2'].value = (str(datetime.today())[5:7]+'월')
             ws['B14'].value = (str(datetime.today())[5:7] + '월')
             for i in (self.stock + self.stock_etf):
                 browser.get(url_yah + i + '/history?p=' + i)
-                date_choice = str(datetime.today().strftime("%b")) + ' 01, ' + str(datetime.today().strftime("%Y"))
+                date_choice = str(datetime.today().strftime("%b")) + ' 03, ' + str(datetime.today().strftime("%Y"))
                 soup = BeautifulSoup(browser.page_source, features="lxml")
-                price_mon = soup.find('span', text=date_choice).parent.next_sibling.text
+                date = soup.find('span', text=date_choice)
+                price_mon = date.parent.next_sibling.next_sibling.next_sibling.next_sibling.text
                 self.prices_mon.append(float(price_mon))
-                browser.quit()
+            browser.quit()
             for i,j in enumerate(self.prices_mon):
                 ws["C"+str(15 + i)].value = j
                 wb.save(f_name)
         print('checking month is completed.')
 
     def crawl_prices(self):
+        browser = webdriver.Chrome()
         for i in (self.stock + self.stock_etf):
             browser.get(url_goo + i + '+stock')
             soup = BeautifulSoup(browser.page_source, features="lxml")
