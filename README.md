@@ -27,3 +27,6 @@
 ## [Notice]
 * Don't decide to buy stock only check a relative price. Stock prices are determined by `Standard Interest Rates` and `consumer psychology`.
 * Don't make too much traffic from the site.
+
+
+
