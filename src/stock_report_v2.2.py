@@ -13,7 +13,7 @@ class Stock_report():
         global url_goo, url_yah, f_name
         url_goo = 'https://www.google.com/search?q='
         url_yah = 'https://finance.yahoo.com/quote/'
-        f_name = './report/stock_report.xlsx'
+        f_name = '../report/stock_report.xlsx'
         self.stock = []
         self.stock_etf = []
         self.prices_now = []
@@ -78,7 +78,7 @@ class Stock_report():
             ws["E"+str(15 + i)].value = j
         for i,j in enumerate(self.prices_52w):
             ws["C"+str(3 + i)].value = j
-        wb.save(f"./report/stock_report_{str(datetime.today())[2:11]}.xlsx")
+        wb.save(f"../report/stock_report_{str(datetime.today())[2:11]}.xlsx")
         print('updating file is completed.')
 
 

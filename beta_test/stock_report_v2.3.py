@@ -10,9 +10,10 @@ from bs4 import BeautifulSoup
 
 class Stock_report():
     def __init__(self):
-        global url_goo, url_yah, f_name, save_path, browser
+        global url_goo, url_yah, url_fed, f_name, save_path, browser
         url_goo = 'https://www.google.com/search?q='
         url_yah = 'https://finance.yahoo.com/quote/'
+        url_fed = 'https://kr.investing.com/central-banks/fed-rate-monitor'
         f_name = '../report/stock_report.xlsx'
         save_path = f"./test.xlsx"
         browser = webdriver.Chrome()
@@ -22,23 +23,26 @@ class Stock_report():
         self.prices_52w = []
         self.prices_mon = []
         self.per_today = []
+        self.fed_date = None
         self.d_alarms = f''
         self.n_alarms = f''
+        self.f_alarms = f''
 
     def process(self):
         self.stock_req()
-        self.mon_checker()
-        self.crawl_prices()
-        self.update_file()
+        # self.mon_checker()
+        # self.crawl_prices()
+        self.crawl_fed()
+        # self.update_file()
         self.alarm()
 
     def stock_req(self):
         # stock = input('Please tell me tickers of stocks to crawl. : ').split()
-        self.stock = ['aapl',
-                       'googl', 'nvda',
-                       'tsla', 'ko',
-                       'pep',
-                       'asml']
+        self.stock = ['AAPL',
+                       'GOOGL', 'NVDA',
+                       'TSLA', 'KO',
+                       'PEP',
+                       'ASML']
         self.stock_etf = ['qqq',
                            'spy']
 
@@ -76,6 +80,13 @@ class Stock_report():
         browser.quit()
         print('crawling is completed.')
 
+    def crawl_fed(self):
+        browser.get(url_fed)
+        soup = BeautifulSoup(browser.page_source, features="lxml")
+        self.fed_date = soup.find('div', attrs={'class': 'fedRateDate'}).text
+        browser.quit()
+
+
     def update_file(self):
         wb = openpyxl.load_workbook(f_name)
         ws = wb.active
@@ -84,30 +95,35 @@ class Stock_report():
         for i,j in enumerate(self.prices_52w):
             ws["C"+str(3 + i)].value = j
         wb.save(save_path)
-        print('updating file is completed.')
-
+        print('Updating file is completed.')
 
     def alarm(self):
-        wb = openpyxl.load_workbook(save_path, data_only=True)
+        wb = openpyxl.load_workbook(save_path)
         ws = wb.active
 
-        d_alarm = [f'{self.stock[i]}: {j}%    '
+        d_alarm = [f'{self.stock[i]} has a big change. {j}%    '
                    if abs(j) > 5 else ''
-                   for i,j in enumerate(self.per_today)]
+                   for i, j in enumerate(self.per_today)]
         self.d_alarms = ''.join(d_alarm)
-        print(self.d_alarms)
 
         for i, j in enumerate(self.per_today):
-            isnode = ws['F' + str(15 + i)].value * 100
-            print(isnode)
-            # if str(isnode - j)[1] != str(isnode)[1]:
-            #     n_alarm = f'{self.stock[i]}: {int(isnode)}%    '
-            #     self.n_alarms += n_alarm
+            rate_today = (ws['E' + str(15 + i)].value - ws['C' + str(3 + i)].value) / ws['C' + str(3 + i)].value
+            isnode = round(rate_today * 100)
+            if str(isnode - j)[1] != str(isnode)[1]:
+                n_alarm = f'{self.stock[i]} is arrived new node. {int(isnode)}%    '
+                self.n_alarms += n_alarm
+
+        target_date = datetime(int(self.fed_date[:5]), int(self.fed_date[7:9]), int(self.fed_date[11:13]))
+        d_day = target_date - datetime.today()
+        print(f"d-day: {d_day.days}")
 
         if (self.d_alarms != '') or (self.n_alarms != ''):
             wb = openpyxl.load_workbook(save_path)
             ws = wb.active
             ws["M15"].value = self.d_alarms
+            ws["M16"].value = self.n_alarms
+        wb.save(save_path)
+        print('Checking alarm is completed.')
 
 
 if __name__ == '__main__':
