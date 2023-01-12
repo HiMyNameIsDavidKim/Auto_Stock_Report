@@ -30,10 +30,9 @@ class Stock_report():
 
     def process(self):
         self.stock_req()
-        # self.mon_checker()
-        # self.crawl_prices()
-        self.crawl_fed()
-        # self.update_file()
+        self.mon_checker()
+        self.crawl_prices()
+        self.update_file()
         self.alarm()
 
     def stock_req(self):
@@ -72,20 +71,18 @@ class Stock_report():
             text_nows = [float(i.text) for i in find_now]
             find_52w = soup.find_all('div', attrs={'data-attrid': '52-주 최고'})
             text_52ws = [float(i.text) for i in find_52w]
-            find_per = soup.find('span', attrs={'class': 'jBBUv'})
-            text_per = float(find_per.text[1:-2])
             self.prices_now += text_nows
             self.prices_52w += text_52ws
-            self.per_today.append(text_per)
-        browser.quit()
-        print('crawling is completed.')
 
-    def crawl_fed(self):
+            find_per = soup.find('span', attrs={'class': 'jBBUv'})
+            text_per = float(find_per.text[1:-2])
+            self.per_today.append(text_per)
+
         browser.get(url_fed)
         soup = BeautifulSoup(browser.page_source, features="lxml")
         self.fed_date = soup.find('div', attrs={'class': 'fedRateDate'}).text
         browser.quit()
-
+        print('crawling is completed.')
 
     def update_file(self):
         wb = openpyxl.load_workbook(f_name)
@@ -106,7 +103,7 @@ class Stock_report():
                    for i, j in enumerate(self.per_today)]
         self.d_alarms = ''.join(d_alarm)
 
-        for i, j in enumerate(self.per_today):
+        for i, j in enumerate(self.per_today[:7]):
             rate_today = (ws['E' + str(15 + i)].value - ws['C' + str(3 + i)].value) / ws['C' + str(3 + i)].value
             isnode = round(rate_today * 100)
             if str(isnode - j)[1] != str(isnode)[1]:
@@ -115,13 +112,15 @@ class Stock_report():
 
         target_date = datetime(int(self.fed_date[:5]), int(self.fed_date[7:9]), int(self.fed_date[11:13]))
         d_day = target_date - datetime.today()
-        print(f"d-day: {d_day.days}")
+        if d_day.days < 8:
+            self.f_alarms = f"FED's interest rate announcement is {d_day.days} days away."
 
         if (self.d_alarms != '') or (self.n_alarms != ''):
             wb = openpyxl.load_workbook(save_path)
             ws = wb.active
             ws["M15"].value = self.d_alarms
             ws["M16"].value = self.n_alarms
+            ws["M17"].value = self.f_alarms
         wb.save(save_path)
         print('Checking alarm is completed.')
 
