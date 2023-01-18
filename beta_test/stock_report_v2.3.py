@@ -10,10 +10,13 @@ from bs4 import BeautifulSoup
 
 class Stock_report():
     def __init__(self):
-        global url_goo, url_yah, url_fed, f_name, save_path, browser
+        global url_goo, url_yah, url_fed, url_cpi, url_yoy, \
+            f_name, save_path, browser
         url_goo = 'https://www.google.com/search?q='
         url_yah = 'https://finance.yahoo.com/quote/'
         url_fed = 'https://kr.investing.com/central-banks/fed-rate-monitor'
+        url_cpi = 'https://www.bls.gov/schedule/news_release/cpi.htm'
+        url_yoy = 'https://www.investing.com/economic-calendar/cpi-733'
         f_name = '../report/stock_report.xlsx'
         save_path = f"./test.xlsx"
         browser = webdriver.Chrome()
@@ -24,9 +27,11 @@ class Stock_report():
         self.prices_mon = []
         self.per_today = []
         self.fed_date = None
+        self.cpi_date = None
         self.d_alarms = f''
         self.n_alarms = f''
         self.f_alarms = f''
+        self.c_alarms = f''
 
     def process(self):
         self.stock_req()
@@ -81,6 +86,11 @@ class Stock_report():
         browser.get(url_fed)
         soup = BeautifulSoup(browser.page_source, features="lxml")
         self.fed_date = soup.find('div', attrs={'class': 'fedRateDate'}).text
+
+        browser.get(url_cpi)
+        df = pd.read_html(browser.page_source)[1]
+        self.cpi_date = [i for i in df['Release Date']]
+
         browser.quit()
         print('crawling is completed.')
 
@@ -113,7 +123,13 @@ class Stock_report():
         target_date = datetime(int(self.fed_date[:5]), int(self.fed_date[7:9]), int(self.fed_date[11:13]))
         d_day = target_date - datetime.today()
         if d_day.days < 8:
-            self.f_alarms = f"FED's interest rate announcement is {d_day.days} days away."
+            self.f_alarms = f"FED's interest rate announcement is {d_day.days} days away." # url_fed
+
+        for cpi_date in self.cpi_date:
+            target_date = datetime(int(cpi_date[-4:]), int(self.month_to_num(cpi_date[:3])), int(cpi_date[-8:-6]))
+            d_day = target_date - datetime.today()
+            if 0 < d_day.days < 8:
+                self.c_alarms = f"CPI announcement is {d_day.days} days away." # url_yoy
 
         if (self.d_alarms != '') or (self.n_alarms != ''):
             wb = openpyxl.load_workbook(save_path)
@@ -121,8 +137,13 @@ class Stock_report():
             ws["M15"].value = self.d_alarms
             ws["M16"].value = self.n_alarms
             ws["M17"].value = self.f_alarms
+            ws["M18"].value = self.c_alarms
         wb.save(save_path)
         print('Checking alarm is completed.')
+
+    def month_to_num(self, month):
+        return {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
+                'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}[month]
 
 
 if __name__ == '__main__':
