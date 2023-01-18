@@ -43,8 +43,8 @@ class Stock_report():
     def stock_req(self):
         # stock = input('Please tell me tickers of stocks to crawl. : ').split()
         self.stock = ['AAPL',
-                       'GOOGL', 'NVDA',
-                       'TSLA', 'KO',
+                       'KO', 'NVDA',
+                       'TSLA', 'GOOGL',
                        'PEP',
                        'ASML']
         self.stock_etf = ['qqq',
@@ -53,9 +53,9 @@ class Stock_report():
     def mon_checker(self):
         wb = openpyxl.load_workbook(f_name)
         ws = wb.active
-        if str(ws['B2'].value) != (str(datetime.today())[5:7]+'월'):
-            ws['B2'].value = (str(datetime.today())[5:7]+'월')
-            ws['B14'].value = (str(datetime.today())[5:7] + '월')
+        if str(ws['B2'].value) != (str(datetime.today())[5:7]+'M'):
+            ws['B2'].value = (str(datetime.today())[5:7]+'M')
+            ws['B14'].value = (str(datetime.today())[5:7] + 'M')
             for i in (self.stock + self.stock_etf):
                 browser.get(url_yah + i + '/history?p=' + i)
                 date_choice = str(datetime.today().strftime("%b")) + ' 01, ' + str(datetime.today().strftime("%Y"))
@@ -66,7 +66,7 @@ class Stock_report():
             for i,j in enumerate(self.prices_mon):
                 ws["C"+str(15 + i)].value = j
                 wb.save(f_name)
-        print('checking month is completed.')
+        print('### checking month is completed. ###')
 
     def crawl_prices(self):
         for i in (self.stock + self.stock_etf):
@@ -92,7 +92,7 @@ class Stock_report():
         self.cpi_date = [i for i in df['Release Date']]
 
         browser.quit()
-        print('crawling is completed.')
+        print('### crawling is completed. ###')
 
     def update_file(self):
         wb = openpyxl.load_workbook(f_name)
@@ -102,7 +102,7 @@ class Stock_report():
         for i,j in enumerate(self.prices_52w):
             ws["C"+str(3 + i)].value = j
         wb.save(save_path)
-        print('Updating file is completed.')
+        print('### Updating file is completed. ###')
 
     def alarm(self):
         wb = openpyxl.load_workbook(save_path)
@@ -139,7 +139,7 @@ class Stock_report():
             ws["M17"].value = self.f_alarms
             ws["M18"].value = self.c_alarms
         wb.save(save_path)
-        print('Checking alarm is completed.')
+        print('### Checking alarm is completed. ###')
 
     def month_to_num(self, month):
         return {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
