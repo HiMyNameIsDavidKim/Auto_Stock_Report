@@ -78,21 +78,23 @@ class Stock_report():
             text_52ws = [float(i.text) for i in find_52w]
             self.prices_now += text_nows
             self.prices_52w += text_52ws
-
             find_per = soup.find('span', attrs={'class': 'jBBUv'})
             text_per = float(find_per.text[1:-2])
             self.per_today.append(text_per)
+            print('### Crawling price is completed. ###')
 
         browser.get(url_fed)
         soup = BeautifulSoup(browser.page_source, features="lxml")
         self.fed_date = soup.find('div', attrs={'class': 'fedRateDate'}).text
+        print('### Crawling FED interest date is completed. ###')
 
         browser.get(url_cpi)
         df = pd.read_html(browser.page_source)[1]
         self.cpi_date = [i for i in df['Release Date']]
+        print('### Crawling cpi date is completed. ###')
 
         browser.quit()
-        print('### crawling is completed. ###')
+
 
     def update_file(self):
         wb = openpyxl.load_workbook(f_name)
