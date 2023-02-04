@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By
 from datetime import datetime
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
+import yfinance as yf
 
 
 class Stock_report():
@@ -13,7 +14,6 @@ class Stock_report():
         global url_goo, url_yah, url_fed, url_cpi, url_yoy, \
             f_name, save_path, browser
         url_goo = 'https://www.google.com/search?q='
-        url_yah = 'https://finance.yahoo.com/quote/'
         url_fed = 'https://kr.investing.com/central-banks/fed-rate-monitor'
         url_cpi = 'https://www.bls.gov/schedule/news_release/cpi.htm'
         url_yoy = 'https://www.investing.com/economic-calendar/cpi-733'
@@ -53,20 +53,17 @@ class Stock_report():
     def mon_checker(self):
         wb = openpyxl.load_workbook(f_name)
         ws = wb.active
-        if str(ws['B2'].value) != (str(datetime.today())[5:7]+'월'):
-            ws['B2'].value = (str(datetime.today())[5:7]+'월')
-            ws['B14'].value = (str(datetime.today())[5:7] + '월')
+        if str(ws['B2'].value) != (str(datetime.today())[5:7] + 'M'):
+            ws['B2'].value = (str(datetime.today())[5:7] + 'M')
+            ws['B14'].value = (str(datetime.today())[5:7] + 'M')
             for i in (self.stock + self.stock_etf):
-                browser.get(url_yah + i + '/history?p=' + i)
-                date_choice = str(datetime.today().strftime("%b")) + ' 01, ' + str(datetime.today().strftime("%Y"))
-                soup = BeautifulSoup(browser.page_source, features="lxml")
-                price_mon = soup.find('span', text=date_choice).parent.next_sibling.text
+                df = yf.download(i, start=str(datetime.today())[:9] + '1', end=str(datetime.today())[:9] + '2')
+                price_mon = df['Close'].sum()
                 self.prices_mon.append(float(price_mon))
-                browser.quit()
-            for i,j in enumerate(self.prices_mon):
-                ws["C"+str(15 + i)].value = j
+            for i, j in enumerate(self.prices_mon):
+                ws["C" + str(15 + i)].value = j
                 wb.save(f_name)
-        print('checking month is completed.')
+        print('### Checking month is completed. ###')
 
     def crawl_prices(self):
         for i in (self.stock + self.stock_etf):

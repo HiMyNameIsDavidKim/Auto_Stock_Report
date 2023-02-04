@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By
 from datetime import datetime
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
+import yfinance as yf
 
 
 class Stock_report():
@@ -13,7 +14,6 @@ class Stock_report():
         global url_goo, url_yah, url_fed, url_cpi, url_yoy, \
             f_name, save_path, browser
         url_goo = 'https://www.google.com/search?q='
-        url_yah = 'https://finance.yahoo.com/quote/'
         url_fed = 'https://kr.investing.com/central-banks/fed-rate-monitor'
         url_cpi = 'https://www.bls.gov/schedule/news_release/cpi.htm'
         url_yoy = 'https://www.investing.com/economic-calendar/cpi-733'
@@ -57,16 +57,13 @@ class Stock_report():
             ws['B2'].value = (str(datetime.today())[5:7]+'M')
             ws['B14'].value = (str(datetime.today())[5:7] + 'M')
             for i in (self.stock + self.stock_etf):
-                browser.get(url_yah + i + '/history?p=' + i)
-                date_choice = str(datetime.today().strftime("%b")) + ' 01, ' + str(datetime.today().strftime("%Y"))
-                soup = BeautifulSoup(browser.page_source, features="lxml")
-                price_mon = soup.find('span', text=date_choice).parent.next_sibling.text
+                df = yf.download(i, start=str(datetime.today())[:9] + '1', end=str(datetime.today())[:9] + '2')
+                price_mon = df['Close'].sum()
                 self.prices_mon.append(float(price_mon))
-                browser.quit()
-            for i,j in enumerate(self.prices_mon):
+            for i, j in enumerate(self.prices_mon):
                 ws["C"+str(15 + i)].value = j
                 wb.save(f_name)
-        print('### checking month is completed. ###')
+        print('### Checking month is completed. ###')
 
     def crawl_prices(self):
         for i in (self.stock + self.stock_etf):
@@ -81,7 +78,7 @@ class Stock_report():
             find_per = soup.find('span', attrs={'class': 'jBBUv'})
             text_per = float(find_per.text[1:-2])
             self.per_today.append(text_per)
-            print('### Crawling price is completed. ###')
+        print('### Crawling price is completed. ###')
 
         browser.get(url_fed)
         soup = BeautifulSoup(browser.page_source, features="lxml")
@@ -115,12 +112,12 @@ class Stock_report():
                    for i, j in enumerate(self.per_today)]
         self.d_alarms = ''.join(d_alarm)
 
-        for i, j in enumerate(self.per_today[:7]):
-            rate_today = (ws['E' + str(15 + i)].value - ws['C' + str(3 + i)].value) / ws['C' + str(3 + i)].value
-            isnode = round(rate_today * 100)
-            if str(isnode - j)[1] != str(isnode)[1]:
-                n_alarm = f'{self.stock[i]} is arrived new node. {int(isnode)}%    '
-                self.n_alarms += n_alarm
+        # for i, j in enumerate(self.per_today[:7]):
+        #     rate_today = (ws['E' + str(15 + i)].value - ws['C' + str(3 + i)].value) / ws['C' + str(3 + i)].value
+        #     isnode = round(rate_today * 100)
+        #     if str(isnode - j)[1] != str(isnode)[1]:
+        #         n_alarm = f'{self.stock[i]} is arrived new node. {int(isnode)}%    '
+        #         self.n_alarms += n_alarm
 
         target_date = datetime(int(self.fed_date[:5]), int(self.fed_date[7:9]), int(self.fed_date[11:13]))
         d_day = target_date - datetime.today()
