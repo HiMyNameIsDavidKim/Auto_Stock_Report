@@ -17,9 +17,9 @@ class Stock_report():
         url_fed = 'https://kr.investing.com/central-banks/fed-rate-monitor'
         url_cpi = 'https://www.bls.gov/schedule/news_release/cpi.htm'
         url_yoy = 'https://www.investing.com/economic-calendar/cpi-733'
-        f_name = '../report/stock_report.xlsx'
+        f_name = r'../report/stock_report.xlsx'
         save_path = f"../report/stock_report_{str(datetime.today())[2:11]}.xlsx"
-        browser = webdriver.Chrome()
+        browser = webdriver.Chrome(ChromeDriverManager().install())  # ChromeDriverManager().install()
         self.stock = []
         self.stock_etf = []
         self.prices_now = []
