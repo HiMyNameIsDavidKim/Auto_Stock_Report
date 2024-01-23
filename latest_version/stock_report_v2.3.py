@@ -2,11 +2,14 @@ import os
 import pandas as pd
 import openpyxl
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from datetime import datetime
+from datetime import datetime, timedelta
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import yfinance as yf
+import exchange_calendars as ecals
 
 
 class Stock_report():
@@ -19,7 +22,11 @@ class Stock_report():
         url_yoy = 'https://www.investing.com/economic-calendar/cpi-733'
         f_name = r'../report/stock_report.xlsx'
         save_path = f"../report/stock_report_{str(datetime.today())[2:11]}.xlsx"
-        browser = webdriver.Chrome(ChromeDriverManager().install())  # ChromeDriverManager().install()
+        executable_path = ChromeDriverManager(driver_version='120.0.6099.109').install()
+        service = Service(executable_path=executable_path)
+        # chrome_options = Options()
+        # chrome_options.add_experimental_option("detach", True)  # keep turn on
+        browser = webdriver.Chrome(service=service)
         self.stock = []
         self.stock_etf = []
         self.prices_now = []
@@ -53,11 +60,20 @@ class Stock_report():
     def mon_checker(self):
         wb = openpyxl.load_workbook(f_name)
         ws = wb.active
+        today = datetime.today()
+        first_day_of_month = today.replace(day=1)
+        day_offset = (0 - first_day_of_month.weekday() + 7) % 7
+        first_monday = first_day_of_month + timedelta(days=day_offset)
+        first_tuesday = first_day_of_month + timedelta(days=day_offset) + timedelta(days=1)
+        nyse = ecals.get_calendar('NYSE')
+        if nyse.is_session(str(first_monday)[:10]) is False:
+            first_monday += timedelta(days=1)
+            first_tuesday += timedelta(days=1)
         if str(ws['B2'].value) != (str(datetime.today())[5:7]+'M'):
             ws['B2'].value = (str(datetime.today())[5:7]+'M')
             ws['B14'].value = (str(datetime.today())[5:7] + 'M')
             for i in (self.stock + self.stock_etf):
-                df = yf.download(i, start=str(datetime.today())[:9] + '1', end=str(datetime.today())[:9] + '2')
+                df = yf.download(i, start=str(first_monday)[:10], end=str(first_tuesday)[:10])
                 price_mon = df['Close'].sum()
                 self.prices_mon.append(float(price_mon))
             for i, j in enumerate(self.prices_mon):
@@ -80,15 +96,15 @@ class Stock_report():
             self.per_today.append(text_per)
         print('### Crawling price is completed. ###')
 
-        browser.get(url_fed)
-        soup = BeautifulSoup(browser.page_source, features="lxml")
-        self.fed_date = soup.find('div', attrs={'class': 'fedRateDate'}).text
-        print('### Crawling FED interest date is completed. ###')
-
-        browser.get(url_cpi)
-        df = pd.read_html(browser.page_source)[1]
-        self.cpi_date = [i for i in df['Release Date']]
-        print('### Crawling cpi date is completed. ###')
+        # browser.get(url_fed)
+        # soup = BeautifulSoup(browser.page_source, features="lxml")
+        # self.fed_date = soup.find('div', attrs={'class': 'fedRateDate'}).text
+        # print('### Crawling FED interest date is completed. ###')
+        #
+        # browser.get(url_cpi)
+        # df = pd.read_html(browser.page_source)[1]
+        # self.cpi_date = [i for i in df['Release Date']]
+        # print('### Crawling cpi date is completed. ###')
 
         browser.quit()
 
@@ -119,16 +135,16 @@ class Stock_report():
         #         n_alarm = f'{self.stock[i]} is arrived new node. {int(isnode)}%    '
         #         self.n_alarms += n_alarm
 
-        target_date = datetime(int(self.fed_date[:5]), int(self.fed_date[7:9]), int(self.fed_date[11:13]))
-        d_day = target_date - datetime.today()
-        if d_day.days < 8:
-            self.f_alarms = f"FED's interest rate announcement is {d_day.days} days away." # url_fed
+        # target_date = datetime(int(self.fed_date[:5]), int(self.fed_date[7:9]), int(self.fed_date[11:13]))
+        # d_day = target_date - datetime.today()
+        # if d_day.days < 8:
+        #     self.f_alarms = f"FED's interest rate announcement is {d_day.days} days away." # url_fed
 
-        for cpi_date in self.cpi_date:
-            target_date = datetime(int(cpi_date[-4:]), int(self.month_to_num(cpi_date[:3])), int(cpi_date[-8:-6]))
-            d_day = target_date - datetime.today()
-            if 0 < d_day.days < 8:
-                self.c_alarms = f"CPI announcement is {d_day.days} days away." # url_yoy
+        # for cpi_date in self.cpi_date:
+        #     target_date = datetime(int(cpi_date[-4:]), int(self.month_to_num(cpi_date[:3])), int(cpi_date[-8:-6]))
+        #     d_day = target_date - datetime.today()
+        #     if 0 < d_day.days < 8:
+        #         self.c_alarms = f"CPI announcement is {d_day.days} days away." # url_yoy
 
         if (self.d_alarms != '') or (self.n_alarms != ''):
             wb = openpyxl.load_workbook(save_path)
