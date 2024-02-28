@@ -22,7 +22,7 @@ class Stock_report():
         url_yoy = 'https://www.investing.com/economic-calendar/cpi-733'
         f_name = r'../report/stock_report.xlsx'
         save_path = f"../report/stock_report_{str(datetime.today())[2:11]}.xlsx"
-        executable_path = ChromeDriverManager(driver_version='120.0.6099.109').install()
+        executable_path = ChromeDriverManager().install()  # driver_version='120.0.6099.109'
         service = Service(executable_path=executable_path)
         # chrome_options = Options()
         # chrome_options.add_experimental_option("detach", True)  # keep turn on
@@ -52,7 +52,7 @@ class Stock_report():
         self.stock = ['AAPL',
                        'KO', 'NVDA',
                        'TSLA', 'GOOGL',
-                       'PEP',
+                       'MSFT',
                        'ASML']
         self.stock_etf = ['qqq',
                            'spy']
