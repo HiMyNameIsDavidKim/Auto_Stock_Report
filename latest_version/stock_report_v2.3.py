@@ -83,12 +83,12 @@ class Stock_report():
 
     def crawl_prices(self):
         for i in (self.stock + self.stock_etf):
-            browser.get(url_goo + i + '+stock')
+            browser.get(url_goo + i + ' nasdaq stock')
             soup = BeautifulSoup(browser.page_source, features="lxml")
             find_now = soup.find_all('span', attrs={'class': 'IsqQVc NprOob wT3VGc'})
-            text_nows = [float(i.text) for i in find_now]
+            text_nows = [float(i.text.replace(',','')) for i in find_now]
             find_52w = soup.find_all('div', attrs={'data-attrid': '52-주 최고'})
-            text_52ws = [float(i.text) for i in find_52w]
+            text_52ws = [float(i.text.replace(',','')) for i in find_52w]
             self.prices_now += text_nows
             self.prices_52w += text_52ws
             find_per = soup.find('span', attrs={'class': 'jBBUv'})
