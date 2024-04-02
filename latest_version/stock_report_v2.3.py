@@ -49,11 +49,9 @@ class Stock_report():
 
     def stock_req(self):
         # stock = input('Please tell me tickers of stocks to crawl. : ').split()
-        self.stock = ['AAPL',
-                       'KO', 'NVDA',
-                       'TSLA', 'GOOGL',
-                       'MSFT',
-                       'ASML']
+        self.stock = ['KO', 'MSFT',
+                      'NVDA', 'TSLA',
+                      'GOOGL', 'AAPL', 'ASML']
         self.stock_etf = ['qqq',
                            'spy']
 

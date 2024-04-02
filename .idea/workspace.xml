@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="0a8f510f-f55e-427a-9eee-9b181cb659f9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/latest_version/stock_report_v2.3.py" beforeDir="false" afterPath="$PROJECT_DIR$/latest_version/stock_report_v2.3.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/report/stock_report.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/report/stock_report.xlsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -58,7 +59,9 @@
       <workItem from="1707368487223" duration="82000" />
       <workItem from="1707975621396" duration="331000" />
       <workItem from="1709130912676" duration="481000" />
-      <workItem from="1709617908569" duration="314000" />
+      <workItem from="1709617908569" duration="674000" />
+      <workItem from="1710830396326" duration="157000" />
+      <workItem from="1712069165314" duration="93000" />
     </task>
     <servers />
   </component>
@@ -66,6 +69,6 @@
     <option name="version" value="3" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/auto_stock_report$stock_report_v2_3.coverage" NAME="stock_report_v2.3 Coverage Results" MODIFIED="1709617910033" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/latest_version" />
+    <SUITE FILE_PATH="coverage/auto_stock_report$stock_report_v2_3.coverage" NAME="stock_report_v2.3 Coverage Results" MODIFIED="1710830435651" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/latest_version" />
   </component>
 </project>
